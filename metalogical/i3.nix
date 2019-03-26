@@ -23,6 +23,45 @@ let
   };
 in
 {
+  services.dunst = {
+    enable = true;
+    settings = {
+      global = {
+        follow = "keyboard";
+
+        geometry = "200x3-5+5"; # at most 3 notifs at the bottom right of the screen
+        padding = 10;
+        frame_width = 2;
+
+        alignment = "center";
+        word_wrap = true;
+
+        separator_color = "#383838";
+        frame_color = "#383838";
+
+        font = "Source Sans Pro 14";
+      };
+      urgency_low = {
+        background = "#282828";
+        foreground = "#7daa71";
+        timeout = 5;
+      };
+      urgency_normal = {
+        background = "#282828";
+        foreground = "#c0ad93";
+        timeout = 10;
+      };
+      urgency_critical = {
+        background = "#282828";
+        foreground = "#bf8d63";
+        timeout = 0;
+      };
+      shortcuts = {
+        close = "mod1+Escape";
+        history = "mod1+shift+Escape";
+      };
+    };
+  };
   xsession = {
     enable = true;
     windowManager.i3 = {

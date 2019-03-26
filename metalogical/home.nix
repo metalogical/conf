@@ -5,7 +5,7 @@
   imports = [ ./i3.nix ./fonts.nix ./neovim.nix ./go-dev.nix ];
 
   home.packages = with pkgs; [
-    alacritty rofi
+    alacritty rofi libnotify
     spotify
 
     # music stuff
