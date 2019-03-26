@@ -2,10 +2,10 @@
 {
   home.sessionVariables = { EDITOR = "nvim"; };
 
-  imports = [ ./xsession.nix ./fonts.nix ./neovim.nix ./go-dev.nix ];
+  imports = [ ./i3.nix ./fonts.nix ./neovim.nix ./go-dev.nix ];
 
   home.packages = with pkgs; [
-    alacritty dmenu
+    alacritty rofi
     spotify
 
     # music stuff

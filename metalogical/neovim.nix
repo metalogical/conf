@@ -5,6 +5,7 @@
     enable = true;
     vimAlias = true;
     viAlias = true;
+    withRuby = false;
     configure = {
       packages.metalogical = with pkgs.vimPlugins; {
         start = [
@@ -17,6 +18,8 @@
         opt = [ ];
       };
       customRC = ''
+" automatic: filetype indent plugin on | syn on
+
 let mapleader = "\<Space>"
 let maplocalleader = "\<Space>"
 
@@ -48,11 +51,6 @@ function SetTabs(spaces)
 endfunction
 call SetTabs(4)
 set backspace=2
-
-" *** sanity
-syntax on
-filetype on
-filetype plugin indent on
 
 " *** mouse events
 set ttyfast

@@ -1,10 +1,32 @@
 {pkgs, ...}:
+let
+  myblocks = with pkgs; let
+    confFile = writeText "i3blocks.conf" ''
+      [time]
+      command=date "+%a %b %d %R"
+      interval=1
+    '';
+  in pkgs.stdenv.mkDerivation {
+    name = "i3blocks-${pkgs.stdenv.lib.getVersion pkgs.i3blocks}";
+    buildCommand = let bin = "${pkgs.i3blocks}/bin/i3blocks"; in ''
+      if [ ! -x "${bin}" ]
+      then
+          echo "cannot find executable file \`${bin}'"
+          exit 1
+      fi
+
+      makeWrapper "$(readlink -v --canonicalize-existing "${bin}")" \
+        "$out/bin/i3blocks" --add-flags "-c ${confFile}"
+    '';
+
+    buildInputs = [pkgs.makeWrapper];
+  };
+in
 {
   xsession = {
     enable = true;
     windowManager.i3 = {
       enable = true;
-      package = pkgs.i3-gaps;
       config = {
         fonts = [ "Source Sans Pro 10" ]; # TODO expose option for this?
         window.border = 4;
@@ -31,11 +53,16 @@
             childBorder = "#000000";
           };
         };
+        bars = [{
+          statusCommand = "${myblocks}/bin/i3blocks";
+          fonts = [ "Material Icons 10" "Source Sans Pro 12" ];
+        }];
         floating.modifier = "Mod1";
         keybindings = let modifier = "Mod1"; in {
           "${modifier}+Return" = "exec alacritty";
           "${modifier}+Shift+q" = "kill";
-          "${modifier}+space" = "exec ${pkgs.dmenu}/bin/dmenu_run";
+          "${modifier}+space" = "exec \"${pkgs.rofi}/bin/rofi -modi window,run -show run\"";
+          "${modifier}+Tab" = "exec \"${pkgs.rofi}/bin/rofi -modi window,run -show window\"";
           # TODO i3lock
           # exec xautolock -time 3 -locker 'i3-lock -c 000000' &
           # "{modifier}+semicolon" = "exec i3-lock -c 000000
@@ -105,10 +132,6 @@
           "XF86AudioLowerVolume" = "exec amixer -q set Master 2%- unmute";
           "XF86AudioRaiseVolume" = "exec amixer -q set Master 2%+ unmute";
           "XF86AudioMute" = "exec amixer -q set Master toggle";
-        };
-        gaps = {
-          inner = 10;
-          outer = 5;
         };
       };
     };
