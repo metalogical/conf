@@ -72,11 +72,11 @@ augroup resCur
 augroup END
 
 " *** completions/LSP
-let g:deoplete#enable_at_startup = 1
+" let g:deoplete#enable_at_startup = 1
 let g:LanguageClient_autoStart = 1
 let g:LanguageClient_serverCommands = {
     \ 'lean': ['node', '/usr/local/lib/node_modules/lean-language-server/lib/index.js', '--stdio'],
-    \ 'go': ['go-langserver'],
+    \ 'go': ['gopls'],
     \ 'python': ['pyls'],
     \ 'haskell': ['hie', '--lsp'],
     \ 'reason': ['ocaml-language-server', '--stdio'],
@@ -91,4 +91,6 @@ let g:go_fmt_command = "goimports"
       '';
     };
   };
+
+  home.sessionVariables.EDITOR = "nvim";
 }

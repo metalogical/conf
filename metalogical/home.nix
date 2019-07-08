@@ -1,27 +1,42 @@
-{ pkgs, ... }:
+{ config, pkgs, ... }:
 {
-  home.sessionVariables = { EDITOR = "nvim"; };
+  imports = [ ./gui.nix ./fonts.nix ./neovim.nix ];
 
-  imports = [ ./i3.nix ./fonts.nix ./neovim.nix ./go-dev.nix ];
+  nixpkgs.overlays = [(self: super: {
+    dunst = self.callPackage <nixpkgs/pkgs/applications/misc/dunst> { dunstify = true; };
+  })];
 
   home.packages = with pkgs; [
-    alacritty rofi libnotify
+    alacritty rofi dunst
+    gotop
     spotify
+    xdg_utils
+    zathura # pdf viewer
+    vlc
+    brave
 
-    # music stuff
+    ## music stuff
     jack2 qjackctl a2jmidid # TODO configure autostart etc?
     (callPackage ./programs/pianoteq.nix {})
-    # (callPackage ./programs/reaper.nix {})
+    lilypond
 
-    # 3d printing
+    ## 3d printing
     slic3r-prusa3d
+    openscad
 
-    # virtmanager
+    ## photography
+    darktable
 
-    redshift
+    python37
+    python37Packages.virtualenv
   ];
 
   fonts.fonts = with pkgs; [ source-code-pro source-sans-pro ];
+
+  programs.fish = {
+    enable = true;
+    package = pkgs.fish;
+  };
 
   programs.git = {
     enable = true;
@@ -33,8 +48,15 @@
     };
   };
 
+  programs.go = {
+    enable = true;
+    package = pkgs.go_1_11;
+    goPath = "go";
+  };
+  home.sessionVariables.PATH = "${config.home.sessionVariables.GOPATH}/bin:$PATH";
 
-  programs.firefox.enable = true;
+
+  programs.firefox.enable = true; # for DRM, for now
 
   services.redshift = {
     enable = true;

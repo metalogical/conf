@@ -1,12 +1,6 @@
 { config, pkgs, ... }:
-
 {
   imports = [ ./deps/musnix ./deps/home-manager/nixos ];
-
-
-  # autoupgrade from 18.09 stable
-  system.autoUpgrade.enable = true;
-  system.autoUpgrade.channel = https://nixos.org/channels/nixos-18.09;
 
 
   # sound
@@ -42,9 +36,7 @@
 
 
   # users
-  programs.fish.enable = true; # configure the default shell from home-manager?
   users.extraUsers.metalogical = {
-    shell = pkgs.fish;
     extraGroups = [ "wheel" "audio" "libvirtd" "networkmanager" ];
     isNormalUser = true;
     uid = 1000;

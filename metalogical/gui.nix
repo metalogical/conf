@@ -1,6 +1,6 @@
 {pkgs, ...}:
 let
-  myblocks = with pkgs; let
+  metablocks = with pkgs; let
     confFile = writeText "i3blocks.conf" ''
       [time]
       command=date "+%a %b %d %R"
@@ -21,6 +21,40 @@ let
 
     buildInputs = [pkgs.makeWrapper];
   };
+
+  metavol = pkgs.writeScript "metavol" ''
+    #!${pkgs.bash}/bin/bash
+
+    function get_volume {
+        ${pkgs.alsaUtils}/bin/amixer get Master | grep '%' | head -n 1 | cut -d '[' -f 2 | cut -d '%' -f 1
+    }
+
+    function is_mute {
+        ${pkgs.alsaUtils}/bin/amixer get Master | grep '%' | grep -oE '[^ ]+$' | grep off > /dev/null
+    }
+
+    function send_notification {
+        if is_mute ; then
+            volume="(`get_volume`)"
+        else
+            volume=`get_volume`
+        fi
+        ${pkgs.dunst}/bin/dunstify -i audio-volume-muted-blocking -r 2593 -u low "[vol] $volume"
+    }
+
+    case $1 in
+        up)
+        ${pkgs.alsaUtils}/bin/amixer -q set Master 5%+ unmute > /dev/null
+        ;;
+        down)
+        ${pkgs.alsaUtils}/bin/amixer -q set Master 5%- unmute > /dev/null
+        ;;
+        mute)
+        ${pkgs.alsaUtils}/bin/amixer -q set Master 1+ toggle > /dev/null
+        ;;
+    esac
+    send_notification
+  '';
 in
 {
   services.dunst = {
@@ -93,12 +127,12 @@ in
           };
         };
         bars = [{
-          statusCommand = "${myblocks}/bin/i3blocks";
+          statusCommand = "${metablocks}/bin/i3blocks";
           fonts = [ "Material Icons 10" "Source Sans Pro 12" ];
         }];
         floating.modifier = "Mod1";
         keybindings = let modifier = "Mod1"; in {
-          "${modifier}+Return" = "exec alacritty";
+          "${modifier}+Return" = "exec \"alacritty -e fish\"";
           "${modifier}+Shift+q" = "kill";
           "${modifier}+space" = "exec \"${pkgs.rofi}/bin/rofi -modi window,run -show run\"";
           "${modifier}+Tab" = "exec \"${pkgs.rofi}/bin/rofi -modi window,run -show window\"";
@@ -168,9 +202,10 @@ in
           "${modifier}+Shift+e" = "exec i3-nagbar -t warning -m 'Do you want to exit i3?' -b 'Yes' 'i3-msg exit'";
           # "${modifier}+r" = "mode resize";
 
-          "XF86AudioLowerVolume" = "exec amixer -q set Master 2%- unmute";
-          "XF86AudioRaiseVolume" = "exec amixer -q set Master 2%+ unmute";
-          "XF86AudioMute" = "exec amixer -q set Master toggle";
+          "XF86AudioLowerVolume" = "exec ${metavol} down";
+          # "XF86AudioLowerVolume" = "exec amixer -q set Master 2%- unmute";
+          "XF86AudioRaiseVolume" = "exec ${metavol} up";
+          "XF86AudioMute" = "exec ${metavol} mute";
         };
       };
     };
